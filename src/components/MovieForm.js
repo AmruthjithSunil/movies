@@ -19,14 +19,17 @@ function MovieForm({ addMovie }) {
   const releaseDate = useRef();
   const openingText = useRef();
 
-  const clickHandler = useCallback(function (e) {
-    e.preventDefault();
-    addMovie({
-      title: title.current.value,
-      releaseDate: releaseDate.current.value,
-      openingText: openingText.current.value,
-    });
-  });
+  const clickHandler = useCallback(
+    function (e) {
+      e.preventDefault();
+      addMovie({
+        title: title.current.value,
+        releaseDate: releaseDate.current.value,
+        openingText: openingText.current.value,
+      });
+    },
+    [addMovie]
+  );
 
   return (
     <>
