@@ -22,7 +22,6 @@ function MovieForm({ addMovie }) {
   const clickHandler = useCallback(function (e) {
     e.preventDefault();
     addMovie({
-      id: title.current.value,
       title: title.current.value,
       releaseDate: releaseDate.current.value,
       openingText: openingText.current.value,

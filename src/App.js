@@ -4,6 +4,8 @@ import MoviesList from "./components/MoviesList";
 import "./App.css";
 import MovieForm from "./components/MovieForm";
 
+const serverLink = "https://haha-1b803.firebaseio.com/movies.json";
+
 function App() {
   const [movies, setMovies] = useState([]);
   const [isLoading, setIsLoading] = useState(false);
@@ -15,21 +17,23 @@ function App() {
       setIsLoading(true);
       setError(null);
       try {
-        const response = await fetch("https://swapi.dev/api/films");
+        const response = await fetch(serverLink);
         if (!response.ok) {
           throw new Error("Something went wrong ...Retrying");
         }
         const data = await response.json();
-        setMovies(
-          data.results.map((movie) => {
-            return {
-              id: movie.episode_id,
-              title: movie.title,
-              openingText: movie.opening_crawl,
-              releaseDate: movie.release_date,
-            };
-          })
-        );
+
+        const loadedMovies = [];
+        for (const key in data) {
+          loadedMovies.push({
+            id: key,
+            title: data[key].title,
+            openingText: data[key].openingText,
+            releaseDate: data[key].releaseDate,
+          });
+        }
+
+        setMovies(loadedMovies);
       } catch (err) {
         setError(err.message);
       }
@@ -49,21 +53,22 @@ function App() {
     setIsLoading(true);
     setError(null);
     try {
-      const response = await fetch("https://swapi.dev/api/films");
+      const response = await fetch(serverLink);
       if (!response.ok) {
         throw new Error("Something went wrong ...Retrying");
       }
       const data = await response.json();
-      setMovies(
-        data.results.map((movie) => {
-          return {
-            id: movie.episode_id,
-            title: movie.title,
-            openingText: movie.opening_crawl,
-            releaseDate: movie.release_date,
-          };
-        })
-      );
+
+      const loadedMovies = [];
+      for (const key in data) {
+        loadedMovies.push({
+          id: key,
+          title: data[key].title,
+          openingText: data[key].openingText,
+          releaseDate: data[key].releaseDate,
+        });
+      }
+      setMovies(loadedMovies);
     } catch (err) {
       setError(err.message);
     }
@@ -77,8 +82,19 @@ function App() {
     setCancel(true);
   });
 
-  const addMovie = useCallback(function (movie) {
-    setMovies((movies) => [movie, ...movies]);
+  const addMovie = useCallback(async function (movie) {
+    await fetch(serverLink, {
+      method: "POST",
+      body: JSON.stringify(movie),
+    });
+    clickHandler();
+  });
+
+  const deleteMovie = useCallback(async function (id) {
+    await fetch(`https://haha-1b803.firebaseio.com/movies/${id}.json`, {
+      method: "DELETE",
+    });
+    clickHandler();
   });
 
   return (
@@ -97,7 +113,7 @@ function App() {
             <button onClick={cancelHandler}>Cancel</button>
           </>
         )}
-        <MoviesList movies={movies} />
+        <MoviesList movies={movies} deleteMovie={deleteMovie} />
       </section>
     </React.Fragment>
   );
