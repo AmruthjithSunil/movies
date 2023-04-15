@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useCallback, useEffect, useState } from "react";
 
 import MoviesList from "./components/MoviesList";
 import "./App.css";
@@ -9,7 +9,35 @@ function App() {
   const [error, setError] = useState(null);
   const [cancel, setCancel] = useState(false);
 
-  async function clickHandler() {
+  useEffect(() => {
+    const load = async () => {
+      setIsLoading(true);
+      setError(null);
+      try {
+        const response = await fetch("https://swapi.dev/api/films");
+        if (!response.ok) {
+          throw new Error("Something went wrong ...Retrying");
+        }
+        const data = await response.json();
+        setMovies(
+          data.results.map((movie) => {
+            return {
+              id: movie.episode_id,
+              title: movie.title,
+              openingText: movie.opening_crawl,
+              releaseDate: movie.release_date,
+            };
+          })
+        );
+      } catch (err) {
+        setError(err.message);
+      }
+      setIsLoading(false);
+    };
+    load();
+  }, []);
+
+  const clickHandler = useCallback(async function () {
     if (cancel) {
       console.log("cancelled");
       setCancel(false);
@@ -20,7 +48,7 @@ function App() {
     setIsLoading(true);
     setError(null);
     try {
-      const response = await fetch("https://swapi.dev/api/film");
+      const response = await fetch("https://swapi.dev/api/films");
       if (!response.ok) {
         throw new Error("Something went wrong ...Retrying");
       }
@@ -42,11 +70,11 @@ function App() {
     if (error) {
       setInterval(clickHandler, 5000);
     }
-  }
+  });
 
-  function cancelHandler() {
+  const cancelHandler = useCallback(function () {
     setCancel(true);
-  }
+  });
 
   return (
     <React.Fragment>
